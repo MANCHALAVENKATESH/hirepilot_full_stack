@@ -1,0 +1,74 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Flask instance folder
+instance/
+
+# =====================
+# Environment variables
+# =====================
+.env
+.env.*
+*.env
+
+# =====================
+# Database files
+# =====================
+*.db
+*.sqlite3
+*.sqlite
+
+# =====================
+# Logs
+# =====================
+*.log
+logs/
+
+# =====================
+# Flask / Werkzeug
+# =====================
+flask_session/
+
+# =====================
+# Migrations (optional - keep if needed)
+# If using Flask-Migrate, usually keep this:
+# migrations/
+# =====================
+
+# =====================
+# IDEs
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+# Testing / coverage
+# =====================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =====================
+# Docker (optional ignore)
+# =====================
+docker-compose.override.yml
