@@ -70,7 +70,7 @@ You must follow these rules exactly:
 11. If the approach is correct and reasonably clear, give 7 to 8.
 12. If the approach is correct, optimal, and clearly explained, give 9 to 10.
 13. Never return anything except this format:
-{{"score": 7}}
+{{"score": 7, "approved": False}}
 
 Problem:
 {problem}
@@ -101,7 +101,7 @@ Candidate Approach:
 
         raw_result = response.json().get("response", "")
         parsed = clean_json_response(raw_result)
-
+        print(parsed)
         score = int(parsed.get("score", 0))
         approved = score > 6
 
@@ -165,3 +165,128 @@ def update_transcript(transcript_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+from flask import Blueprint, request, jsonify
+import requests
+
+job_bp = Blueprint("jobs", __name__)
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+
+
+@candidate_transcript.route("/api/jobs/generate-jd", methods=["POST"])
+def generate_jd():
+    try:
+        data = request.get_json()
+        print(data)
+        title = data.get("title", "")
+        department = data.get("department", "")
+        location = data.get("location", "")
+        employment_type = data.get("employmentType", "")
+        experience = data.get("experienceRange", "")
+        skills = data.get("skills", [])
+
+        skills_text = ", ".join(skills)
+
+        prompt = f"""
+Act as a senior HR manager with 15+ years experience writing hiring-ready job descriptions.
+
+Create a professional, realistic, ATS-friendly Job Description.
+
+STRICT INSTRUCTIONS:
+- Output ONLY plain text
+- No HTML
+- No markdown
+- No intro sentence
+- No explanation
+- No placeholders
+- No fake content
+- No repeating lines
+- No symbols except dash for bullets
+- Use proper spacing between sections
+- Keep formatting neat
+- Make it realistic for the role
+- Use clear business English
+
+INPUT DETAILS
+
+Job Title: {title}
+Department: {department}
+Location: {location}
+Employment Type: {employment_type}
+Experience: {experience}
+Skills: {skills_text}
+
+OUTPUT FORMAT EXACTLY:
+
+{title}
+
+Department: {department}
+Location: {location}
+Employment Type: {employment_type}
+Experience Required: {experience}
+
+About the Role
+
+Write one strong professional paragraph of 5 to 7 lines explaining the role, team impact, ownership, and contribution.
+
+Key Responsibilities
+
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+
+Required Skills
+
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+- Bullet point
+
+Preferred Qualifications
+
+- Bullet point
+- Bullet point
+- Bullet point
+
+Benefits
+
+- Competitive compensation
+- Health and wellness benefits
+- Learning and certification support
+- Growth opportunities
+- Collaborative work culture
+
+Equal Opportunity Employer
+
+We are an equal opportunity employer and value diversity, inclusion, and fairness.
+
+Generate final answer only.
+"""
+
+        response = requests.post(
+            OLLAMA_URL,
+            json={
+                "model": "deepseek-coder",
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=120
+        )
+
+        result = response.json()["response"].strip()
+        print(result)
+        return jsonify({
+            "description": result
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e)
+        }), 500
